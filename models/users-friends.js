@@ -1,7 +1,7 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const UsersFriends = sequelize.define(
-    'users-friends',
+    'UsersFriends',
     {
       user_id1: {
         type: DataTypes.INTEGER,
@@ -54,7 +54,26 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
   UsersFriends.associate = function (models) {
-    // associations can be defined here
+    UsersFriends.belongsTo(models.Users, {
+      as: 'user_1',
+      foreignKey: 'user_id1',
+      targetKey: 'id',
+    })
+    models.Users.hasMany(UsersFriends, {
+      as: 'user_1',
+      foreignKey: 'user_id1',
+      sourceKey: 'id',
+    })
+    UsersFriends.belongsTo(models.Users, {
+      as: 'user_2',
+      foreignKey: 'user_id2',
+      targetKey: 'id',
+    })
+    models.Users.hasMany(UsersFriends, {
+      as: 'user_2',
+      foreignKey: 'user_id2',
+      sourceKey: 'id',
+    })
   }
   return UsersFriends
 }

@@ -1,15 +1,20 @@
-'use strict'
+import '@babel/polyfill'
+import bodyParser from 'body-parser'
+;('use strict')
 const express = require('express')
 const httpErrors = require('http-errors')
 const pino = require('pino')
 const pinoHttp = require('pino-http')
 
-module.exports = function main (options, cb) {
+module.exports = function main(options, cb) {
   // Set default options
   const ready = cb || function () {}
-  const opts = Object.assign({
-    // Default options
-  }, options)
+  const opts = Object.assign(
+    {
+      // Default options
+    },
+    options
+  )
 
   const logger = pino()
 
@@ -19,7 +24,7 @@ module.exports = function main (options, cb) {
   let serverClosing = false
 
   // Setup error handling
-  function unhandledError (err) {
+  function unhandledError(err) {
     // Log the errors
     logger.error(err)
 
@@ -42,11 +47,17 @@ module.exports = function main (options, cb) {
   // Create the express app
   const app = express()
 
-
   // Common middleware
   // app.use(/* ... */)
   app.use(pinoHttp({ logger }))
-      
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
+  app.use(
+    bodyParser.json({
+      type: 'application/json',
+      limit: '50mb',
+      extended: true,
+    })
+  )
   // Register routes
   // @NOTE: require here because this ensures that even syntax errors
   // or other startup related errors are caught logged and debuggable.
@@ -56,18 +67,20 @@ module.exports = function main (options, cb) {
   require('./routes')(app, opts)
 
   // Common error handlers
-  app.use(function fourOhFourHandler (req, res, next) {
+  app.use(function fourOhFourHandler(req, res, next) {
     next(httpErrors(404, `Route not found: ${req.url}`))
   })
-  app.use(function fiveHundredHandler (err, req, res, next) {
+  app.use(function fiveHundredHandler(err, req, res, next) {
     if (err.status >= 500) {
       logger.error(err)
     }
     res.status(err.status || 500).json({
-      messages: [{
-        code: err.code || 'InternalServerError',
-        message: err.message
-      }]
+      messages: [
+        {
+          code: err.code || 'InternalServerError',
+          message: err.message,
+        },
+      ],
     })
   })
 
@@ -84,8 +97,9 @@ module.exports = function main (options, cb) {
 
     serverStarted = true
     const addr = server.address()
-    logger.info(`Started at ${opts.host || addr.host || 'localhost'}:${addr.port}`)
+    logger.info(
+      `Started at ${opts.host || addr.host || 'localhost'}:${addr.port}`
+    )
     ready(err, app, server)
   })
 }
-
