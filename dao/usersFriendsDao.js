@@ -1,7 +1,7 @@
 import DB from '../models'
 
 export const getUserFriendsList = async (filters) => {
-  return DB.UsersFriends.findAll({
+  return DB.UsersFriends.findAndCountAll({
     where: filters,
     include: [
       {

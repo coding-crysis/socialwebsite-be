@@ -5,6 +5,7 @@ const express = require('express')
 const httpErrors = require('http-errors')
 const pino = require('pino')
 const pinoHttp = require('pino-http')
+const cors = require('cors')
 
 module.exports = function main(options, cb) {
   // Set default options
@@ -58,6 +59,7 @@ module.exports = function main(options, cb) {
       extended: true,
     })
   )
+  app.use(cors())
   // Register routes
   // @NOTE: require here because this ensures that even syntax errors
   // or other startup related errors are caught logged and debuggable.
